@@ -3,7 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
-    flake-parts.url = "github:hercules-ci/flake-parts";
+    flake-parts = {
+      url = "github:hercules-ci/flake-parts";
+      inputs.nixpkgs-lib.follows = "nixpkgs";
+    };
   };
 
   outputs =
@@ -13,9 +16,13 @@
       perSystem =
         { pkgs, ... }:
         {
-          devShells.default = pkgs.mkShell { packages = with pkgs; [ zig ]; };
+          devShells.default = pkgs.mkShell {
+            packages = with pkgs; [
+              zig
+            ];
+          };
           packages.default = pkgs.stdenv.mkDerivation {
-            pname = "zig-template";
+            pname = "template";
             src = ./.;
             version = "git";
             buildInputs = with pkgs; [ ];
