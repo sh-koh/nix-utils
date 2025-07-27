@@ -1,3 +1,5 @@
 .direnv
 result
+builddir
+dist
 dist-newstyle

@@ -1,5 +1,5 @@
 {
-  description = "A development environment for this C project";
+  description = "A development environment for this Rust project";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -37,34 +37,37 @@
         }:
         {
           formatter = pkgs.nixfmt-rfc-style;
+          packages = {
+            default = self'.packages.accipere;
+            accipere = pkgs.rustPlatform.buildRustPackage (_finalAttrs: {
+              pname = "accipere";
+              version = "0.1.0";
+              src = ./.;
+              buildInputs = with pkgs; [ ];
+              nativeBuildInputs = with pkgs; [ ];
+              strictDeps = true;
+              useFetchCargoVendor = true;
+              cargoLock.lockFile = ./Cargo.lock;
+            });
+          };
           devShells = {
             default = self'.devShells.devel;
             devel = pkgs.mkShell {
-              hardeningDisable = [ "all" ]; # Depend on the project
-              inputsFrom = [ self'.packages.template ]; # FIXME
+              formatter = pkgs.rustfmt;
+              inputsFrom = [ self'.packages.accipere ];
               packages = with pkgs; [
                 just # Make replacement
 
-                # C
-                clang
-                gcc
-                gdb
-                lldb
-                valgrind
+                # Rust
+                bacon # Watcher
+                cargo-info
+                hyperfine
+                lldb # Debugger
+                mprocs
               ];
               shellHook = ''
                 ${config.pre-commit.installationScript}
               '';
-            };
-          };
-          packages = {
-            default = self'.packages.template; # FIXME
-            template = pkgs.stdenv.mkDerivation {
-              pname = "template";
-              src = ./.;
-              version = "git";
-              buildInputs = with pkgs; [ ];
-              nativeBuildInputs = with pkgs; [ ];
             };
           };
           pre-commit.settings.hooks = {
@@ -73,7 +76,7 @@
               settings = {
                 formatters = with pkgs; [
                   nixfmt-rfc-style
-                  clang-tools
+                  rustfmt
                   yamlfmt
                 ];
               };
@@ -85,7 +88,7 @@
                 quiet = true;
               };
             };
-            clang-format.enable = true;
+            clippy.enable = true;
           };
         };
     };
