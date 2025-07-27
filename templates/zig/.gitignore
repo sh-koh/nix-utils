@@ -1,3 +1,4 @@
 .direnv
 result
 .zig-cache
+.pre-commit-config.yaml
